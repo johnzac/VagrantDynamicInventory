@@ -1,0 +1,15 @@
+---
+# vars file for gatherApacheVHostData
+vhostParams:
+    - ServerName
+    - DocumentRoot
+    - SSLCertificateChainFile
+    - SSLCertificateFile
+    - SSLCertificateKeyFile
+
+centOSConfigFiles:
+    - /etc/httpd/conf.d
+    - /etc/httpd/conf
+
+debianOSConfigFiles:
+    - /etc/apache2/sites-enabled

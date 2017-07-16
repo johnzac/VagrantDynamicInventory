@@ -1,0 +1,29 @@
+---
+# tasks file for gatherApacheVHostData
+- name: installing
+  yum: name="libselinux-python" state="present"
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: copying template to remote host
+  template: src="vHostsParser.sh.jinja2" dest="~/vHostsParser.sh" mode="0544"
+- name: executing the script on the remote macines
+  shell: "cat {{ item }}/* | ~/vHostsParser.sh"
+  with_items: "{{ debianOSConfigFiles }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  register: debianOutput
+
+- name: executing the script on the remote macines
+  shell: "cat {{ item }}/* | ~/vHostsParser.sh"
+  with_items: "{{ centOSConfigFiles }}"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  register: centosOutput
+
+- name: Debian Script Output
+  debug: var=debianOutput
+
+- name: CentOs Script Output
+  debug: var=centosOutput
+
+
+     
