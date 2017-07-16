@@ -1,0 +1,69 @@
+---
+# tasks file for vagrantDynamicInventory
+#copying the shell script to get details about the vagrant machines running on the remote machines.
+- name: copying template to remote host
+  template: src="vagrantScript{{ connection_mode }}.sh.jinja2" dest=~/vagrantScript.sh mode="0544"
+  
+- name: just in case
+  stat: 
+    path: ~/vagrantScript.sh
+  register: fileStatus
+      
+- name: Running Vagrant Inventory Script
+  command: sh ~/vagrantScript.sh
+  register: inventoryOut
+  when: fileStatus.stat.exists
+- name: debuggin output
+  debug:
+      var: inventoryOut
+
+- name: debugging stdlines
+  debug:
+      var: "{{ item }}"
+  with_items:
+      "{{ inventoryOut.stdout_lines }}"
+#adding rules to allow ssh connection from ansible master( machine from which the script is run) to the ports vagrant binds on( Binds to 127.0.0.1)
+- name: Adding iptables rules
+  become: true
+  iptables:
+      table: nat
+      chain: PREROUTING
+      protocol: tcp
+      match: tcp
+      destination_port: "{{ item }}"
+      jump: DNAT
+      to_destination: "127.0.0.1:{{ item }}"
+      source: "{{ ansible_master_static_ip }}"
+      state: present
+  with_items:
+        "{{ inventoryOut.stdout_lines }}"
+  when: (connection_mode=="PortForward")
+# To prevent system dropping connection requests after the DNAT (martian packets)
+- name: Setting forward local connection settings on machine
+  become: true
+  sysctl:
+      name: net.ipv4.conf.all.route_localnet
+      value: 1
+      sysctl_set: yes
+  when: (connection_mode=="PortForward") 
+
+- name: Adding public ips to inventory
+  local_action:
+      module: lineinfile
+          dest={{ vagrant_inventory_file }}
+          line={{ item }}
+          state=present
+  when: ((connection_mode=="Public") and (item | ipaddr != false))
+  with_items:
+       "{{inventoryOut.stdout_lines}}"    
+
+- name: Adding ip and port to inventory  
+  local_action:
+      module: lineinfile
+          dest={{ vagrant_inventory_file }}
+          line="{{ 'host' + ansible_default_ipv4.address | regex_replace('\.', '') + item + ' ansible_ssh_port=' + item + ' ansible_ssh_host=' + ansible_default_ipv4.address }}"
+          state=present
+  when: ((connection_mode=="PortForward"))
+  with_items:
+       "{{inventoryOut.stdout_lines}}"    
+
