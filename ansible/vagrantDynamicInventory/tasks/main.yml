@@ -37,7 +37,7 @@
       state: present
   with_items:
         "{{ inventoryOut.stdout_lines }}"
-  when: (connection_mode=="PortForward")
+  when: (connection_mode=="PortForward" and inventory_hostname !="127.0.0.1")
 # To prevent system dropping connection requests after the DNAT (martian packets)
 - name: Setting forward local connection settings on machine
   become: true
@@ -45,7 +45,7 @@
       name: net.ipv4.conf.all.route_localnet
       value: 1
       sysctl_set: yes
-  when: (connection_mode=="PortForward") 
+  when: (connection_mode=="PortForward" and inventory_hostname !="127.0.0.1") 
 
 - name: Adding public ips to inventory
   local_action:
@@ -61,9 +61,10 @@
   local_action:
       module: lineinfile
           dest={{ vagrant_inventory_file }}
-          line="{{ 'host' + ansible_default_ipv4.address | regex_replace('\.', '') + item + ' ansible_ssh_port=' + item + ' ansible_ssh_host=' + ansible_default_ipv4.address }}"
+          line="{{ 'host' + ansible_default_ipv4.address | regex_replace('\.', '') + item + ' ansible_ssh_port=' + item + ' ansible_ssh_host=' + inventory_hostname }}"
           state=present
   when: ((connection_mode=="PortForward"))
   with_items:
        "{{inventoryOut.stdout_lines}}"    
-
+- name: debugging hostnames
+  debug: var={{ inventory_hostname }}
