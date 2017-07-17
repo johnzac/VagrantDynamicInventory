@@ -7,3 +7,9 @@ playbook) if the vagrant machines are assigned public ip's( bridged networking).
 bridged networking, the role can set up the inventory so that ansible uses the remote host ip and port vagrant binds to
 to connect to the machines. It will modify the iptables rules in the remote hosts ans would need root access for this. More
 information is provided in the ansible README.
+
+
+gatherApacheVHostData:
+An ansible role for gathering some basic facts from apache virtual hosts configuration. Works with CentOs and debian distros.
+The parameters to be gatherd should be specified in the vars folder and the response is a json.
+
