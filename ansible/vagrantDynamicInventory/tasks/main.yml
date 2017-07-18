@@ -6,9 +6,14 @@
   register: isRunningCheck
 - name: logging output from vagrant status check
   debug: var=isRunningCheck.stdout
+- name: Start vagrant machines if none are running and forceStartVagrant set to one in vars file and vagrant machinenames passed as argument
+  shell: "vagrant up {{ item }}"
+  when: (isRunningCheck.stdout=="0" and forceStartVagrant=="1" and vagrant_machines is defined)
+  with_items:
+        "{{ vagrant_machines }}"    
 - name: Start vagrant machines if none are running and forceStartVagrant set to one in vars file
   shell: "vagrant up"
-  when: (isRunningCheck.stdout=="0" and forceStartVagrant=="1")
+  when: (isRunningCheck.stdout=="0" and forceStartVagrant=="1" and vagrant_machines is not defined)
 
 - name: copying template to remote host
   template: src="vagrantScript{{ connection_mode }}.sh.jinja2" dest=~/vagrantScript.sh mode="0544"
