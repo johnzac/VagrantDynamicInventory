@@ -1,6 +1,15 @@
 ---
 # tasks file for vagrantDynamicInventory
 #copying the shell script to get details about the vagrant machines running on the remote machines.
+- name: checking if there are running servers
+  shell: "vagrant status | awk '{print $2}' | grep running | wc -l"
+  register: isRunningCheck
+- name: logging output from vagrant status check
+  debug: var=isRunningCheck.stdout
+- name: Start vagrant machines if none are running and forceStartVagrant set to one in vars file
+  shell: "vagrant up"
+  when: (isRunningCheck.stdout=="0" and forceStartVagrant=="1")
+
 - name: copying template to remote host
   template: src="vagrantScript{{ connection_mode }}.sh.jinja2" dest=~/vagrantScript.sh mode="0544"
   
