@@ -2,5 +2,6 @@
 # vars file for vagrantDynamicInventory
 eth: "eth1"
 vagrant_inventory_file: "/etc/ansible/testInventory"
-ansible_master_static_ip: "192.168.100.1"
+ansible_master_static_ip: "192.168.100.78"
 connection_mode: "PortForward"
+forceStartVagrant: "1"
