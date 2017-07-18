@@ -1,2 +1,2 @@
 #!/bin/bash
-vagrant status  | grep running | awk '{print $1}' | xargs -I file vagrant ssh-config file | grep -i 'port' | awk '{print $2}'
+vagrant status  | awk '{ if($2 == "running") { print $0 } }' | grep running | awk '{print $1}' | xargs -I file vagrant ssh-config file | grep -i 'port' | awk '{print $2}'
