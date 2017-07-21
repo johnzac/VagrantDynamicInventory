@@ -8,8 +8,17 @@ vhostParams:
     - SSLCertificateKeyFile
 
 centOSConfigFiles:
-    - /etc/httpd/conf.d
-    - /etc/httpd/conf
+    - /etc/httpd/conf/httpd.conf
 
 debianOSConfigFiles:
-    - /etc/apache2/sites-enabled
+    - /etc/apache2/apache2.conf
+
+centOsServerRoot: "/etc/httpd/"
+
+debianOsServerRoot: "/etc/apache2/"
+
+filter: 1 
+
+ServerName:
+    - "www.example.com"
+    - "dummy-host.example.com"
