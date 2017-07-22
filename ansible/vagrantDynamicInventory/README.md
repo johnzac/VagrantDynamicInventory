@@ -6,6 +6,8 @@ Requirements
 ------------
 
 Script would need root access to the host machines if vagrant is not set up to obtain a public ip by bridging. It uses jinja2 ipaddr filter to check if the returned values are ip addresses, so the ansible master machine would need to have python netaddr library installed. https://pypi.python.org/pypi/netaddr
+If you are briding the vagrant machines to a network interface to get a public ip, make sure you secify the interface to bridge to in the Vagrantfile for forceStartVagrant to work. Something like this should be in your vagrant file
+config.vm.network "public_network",bridge: "eth1"
 
 Role Variables
 --------------
